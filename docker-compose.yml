@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  grpc-server:
+    build:
+      context: .
+      dockerfile: Dockerfile.server
+    ports:
+      - "5001:5001"
+    environment:
+      - NODE_ENV=production
+      - GRPC_URL=0.0.0.0:5001
+    command: npm run start:server
+    networks:
+      - grpc-network
+
+  grpc-client:
+    build:
+      context: .
+      dockerfile: Dockerfile.client
+    depends_on:
+      - grpc-server
+    environment:
+      - NODE_ENV=production
+      - GRPC_URL=grpc-server:5001
+    command: sh -c "sleep 5 && npm run start:client"
+    networks:
+      - grpc-network
+
+networks:
+  grpc-network:
+    driver: bridge
